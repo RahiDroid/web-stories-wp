@@ -47,9 +47,9 @@ function DisplayPage({
   editingElement,
   resetAnimationState,
 }) {
-  const {
-    actions: { WAAPIAnimationMethods },
-  } = useStoryAnimationContext();
+  const WAAPIAnimationMethods = useStoryAnimationContext(
+    (v) => v.actions.WAAPIAnimationMethods
+  );
 
   useEffect(() => {
     switch (animationState) {
@@ -92,12 +92,7 @@ function DisplayPage({
           return null;
         }
         return (
-          <DisplayElement
-            key={element.id}
-            element={element}
-            page={page}
-            isAnimatable
-          />
+          <DisplayElement key={element.id} element={element} isAnimatable />
         );
       })
     : null;
@@ -111,25 +106,15 @@ DisplayPage.propTypes = {
 };
 
 function DisplayLayer() {
-  const {
-    currentPage,
-    animationState,
-    updateAnimationState,
-    selectedElements,
-  } = useStory(({ state, actions }) => {
-    return {
-      currentPage: state.currentPage,
-      animationState: state.animationState,
-      selectedElements: state.selectedElements,
-      updateAnimationState: actions.updateAnimationState,
-    };
-  });
+  const currentPage = useStory((v) => v.state.currentPage);
+  const animationState = useStory((v) => v.state.animationState);
+  const selectedElements = useStory((v) => v.state.selectedElements);
+  const updateAnimationState = useStory((v) => v.actions.updateAnimationState);
 
-  const { editingElement, setPageContainer, setFullbleedContainer } = useCanvas(
-    ({
-      state: { editingElement },
-      actions: { setPageContainer, setFullbleedContainer },
-    }) => ({ editingElement, setPageContainer, setFullbleedContainer })
+  const editingElement = useCanvas((v) => v.state.editingElement);
+  const setPageContainer = useCanvas((v) => v.actions.setPageContainer);
+  const setFullbleedContainer = useCanvas(
+    (v) => v.actions.setFullbleedContainer
   );
 
   const isBackgroundSelected =
