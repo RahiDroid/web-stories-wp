@@ -34,6 +34,7 @@ export function getCustomFonts(apiPath) {
   const path = addQueryArgs(apiPath, {
     per_page: 100,
     service: 'custom',
+    t: new Date().getTime(), // add random # to cache bust this request
   });
 
   return apiFetch({ path });
