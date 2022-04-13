@@ -19,16 +19,53 @@
  */
 import { DATA_LAYER } from './constants';
 
+interface TrackingConfig {
+  /**
+   * Whether tracking is allowed in the current context.
+   *
+   * @default false
+   */
+  trackingAllowed?: boolean;
+  /**
+   * Whether tracking is currently enabled.
+   *
+   * @default false
+   */
+  trackingEnabled?: boolean;
+  /**
+   * Tracking ID.
+   */
+  trackingId: string;
+  /**
+   * GA4 tracking ID.
+   */
+  trackingIdGA4: string;
+  /**
+   * Application name.
+   */
+  appName: string;
+  /**
+   * Application version.
+   */
+  appVersion: string;
+  /**
+   * User properties.
+   */
+  userProperties: Record<string, string | number>;
+}
+
 /**
  * Pushes data onto the data layer.
  *
  * Must push an instance of Arguments to the target.
  * Using an ES6 spread operator (i.e. `...args`) will cause tracking events to _silently_ fail.
+ *
+ * @param {...any} args Data to send.
+ * @return {void}
  */
-export function gtag() {
-  window[DATA_LAYER] = window[DATA_LAYER] || [];
-  //eslint-disable-next-line prefer-rest-params -- Must push instead of using spread to prevent tracking failures.
-  window[DATA_LAYER].push(arguments);
+export function gtag(...args: any) {
+  (window as any)[DATA_LAYER] = (window as any)[DATA_LAYER] || [];
+  (window as any)[DATA_LAYER].push(args);
 }
 
 const DEFAULT_CONFIG = {
@@ -37,6 +74,7 @@ const DEFAULT_CONFIG = {
   trackingId: '',
   trackingIdGA4: '',
   userProperties: {},
+  appName: '',
 };
 
 const {
@@ -45,9 +83,9 @@ const {
   trackingIdGA4,
   appVersion,
   userProperties,
-} = window.webStoriesTrackingSettings || {};
+} = (window as any).webStoriesTrackingSettings || {};
 
-export const config = {
+export const config: TrackingConfig = {
   ...DEFAULT_CONFIG,
   trackingAllowed,
   trackingId,

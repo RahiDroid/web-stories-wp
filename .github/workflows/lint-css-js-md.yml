@@ -6,6 +6,7 @@ on:
     paths:
       - '**.js'
       - '**.cjs'
+      - '**.ts'
       - '**.css'
       - 'packages/**/*.md'
       - '.eslint*'
@@ -24,6 +25,7 @@ on:
     paths:
       - '**.js'
       - '**.cjs'
+      - '**.ts'
       - '**.css'
       - 'packages/**/*.md'
       - '.eslint*'

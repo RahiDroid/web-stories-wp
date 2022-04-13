@@ -247,7 +247,8 @@
           "^@googleforcreators\\/(.*)\\/(.*)": "./packages/$1/src/$2",
           "^@googleforcreators\\/(.*)": "./packages/$1/src/",
           "^@web-stories-wp\\/(.*)": "./packages/$1/src/"
-        }
+        },
+        "extensions": [ ".js", ".jsx", ".ts", ".tsx" ]
       }
     },
     "jsdoc": {
@@ -281,6 +282,31 @@
     ]
   },
   "overrides": [
+    {
+      "files": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "excludedFiles": [
+        "**/*.d.ts"
+      ],
+      "extends": [
+        "plugin:@typescript-eslint/eslint-recommended"
+      ],
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "no-duplicate-imports": "off",
+        "@typescript-eslint/no-duplicate-imports": "error",
+        "jsdoc/require-param-type": "off",
+        "jsdoc/require-returns-type": "off",
+        "no-unused-vars": "off",
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": "error"
+      }
+    },
     {
       "files": [
         "__mocks__/**/*.js",

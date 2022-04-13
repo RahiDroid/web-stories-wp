@@ -28,7 +28,10 @@ import initializeErrorReporting from './initializeErrorReporting';
  * @param {boolean} [sendPageView=true] Whether to send an initial page view event upon loading.
  * @return {Promise<void>} Promise.
  */
-async function initializeTracking(appName, sendPageView = true) {
+async function initializeTracking(
+  appName: string,
+  sendPageView: boolean = true
+) {
   config.appName = appName;
   await enableTracking(sendPageView);
   initializeErrorReporting();

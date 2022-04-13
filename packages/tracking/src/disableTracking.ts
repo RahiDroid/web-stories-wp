@@ -19,7 +19,7 @@
  */
 import { config } from './shared';
 
-function disableTracking() {
+function disableTracking(): void {
   config.trackingEnabled = false;
 }
 

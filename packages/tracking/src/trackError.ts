@@ -21,41 +21,32 @@ import isTrackingEnabled from './isTrackingEnabled';
 import track from './track';
 
 /**
- * Send an Analytics tracking event for clicks.
+ * Send an Analytics tracking event for exceptions.
  *
  * Works for both Universal Analytics and Google Analytics 4.
  *
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/events
- * @param {MouseEvent} event The actual click event.
- * @param {string} eventName The event name (e.g. 'search').
+ * @see https://developers.google.com/analytics/devguides/collection/ga4/exceptions
+ * @see https://developers.google.com/analytics/devguides/collection/gtagjs/exceptions
+ * @param {string} prefix Error prefixed. Concatenated with description.
+ * @param {string} description The error description.
+ * @param {boolean} [fatal=false] Report whether there is a fatal error.
  * @return {Promise<void>} Promise that always resolves.
  */
-async function trackClick(event, eventName) {
-  // currentTarget becomes null after event bubbles up, so we
-  // grab it for reference before any async operations occur.
-  // https://github.com/facebook/react/issues/2857#issuecomment-70006324
-  const { currentTarget } = event;
-
+async function trackError(
+  prefix: string,
+  description: string,
+  fatal: boolean = false
+): Promise<void> {
   if (!(await isTrackingEnabled())) {
     return Promise.resolve();
   }
 
-  const openLinkInNewTab =
-    currentTarget?.target === '_blank' ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.metaKey ||
-    event.which === 2;
+  const eventData = {
+    description: `${prefix}: ${description}`,
+    fatal,
+  };
 
-  if (openLinkInNewTab) {
-    return track(eventName);
-  }
-
-  event.preventDefault();
-
-  return track(eventName).finally(() => {
-    document.location = currentTarget.href;
-  });
+  return track('exception', eventData);
 }
 
-export default trackClick;
+export default trackError;
