@@ -137,7 +137,7 @@ FramesNavAndSelection.propTypes = {
   children: PropTypes.node,
 };
 
-function FrameElements() {
+function FrameElements({ handleEnterFocusGroup }) {
   // We are returning this directly because we want the elementIds array to be shallowly
   // compared between re-renders. This allows element properties to update without re-rendering
   // this top level component.
@@ -175,9 +175,13 @@ function FrameElements() {
         onContextMenu={onOpenMenu}
         onScroll={onScroll}
       >
-        {elementIds.map((id) => {
-          return <FrameElement key={id} id={id} />;
-        })}
+        {elementIds.map((id) => (
+          <FrameElement
+            key={id}
+            id={id}
+            handleEnterFocusGroup={handleEnterFocusGroup}
+          />
+        ))}
         <DesignSpaceGuideline />
       </FramesPageArea>
     )
@@ -199,17 +203,25 @@ function FramesLayer() {
   //   so this is a high hanging fruit with little reward.
   useCanvasKeys(canvasRef);
 
+  const handleEnterFocusGroup = useCallback(
+    (activeId) => {
+      enterFocusGroup({
+        activeId,
+        groupId: FOCUS_GROUPS.ELEMENT_SELECTION,
+        cleanup: () => canvasRef.current?.focus(),
+      });
+    },
+    [enterFocusGroup]
+  );
+
   useKeyDownEffect(
     canvasRef,
     { key: ['enter'] },
     () => {
-      enterFocusGroup({
-        groupId: FOCUS_GROUPS.ELEMENT_SELECTION,
-        cleanup: () => canvasRef.current?.focus(),
-      });
+      handleEnterFocusGroup();
       speak(FRAME_ELEMENT_MESSAGE);
     },
-    [enterFocusGroup, speak]
+    [handleEnterFocusGroup, speak]
   );
 
   return (
@@ -222,7 +234,7 @@ function FramesLayer() {
         // eslint-disable-next-line styled-components-a11y/no-noninteractive-tabindex -- Container used to separate elements from normal tab order.
         tabIndex={0}
       />
-      <FrameElements />
+      <FrameElements handleEnterFocusGroup={handleEnterFocusGroup} />
     </FramesNavAndSelection>
   );
 }

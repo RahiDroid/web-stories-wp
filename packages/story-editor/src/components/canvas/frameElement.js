@@ -102,7 +102,7 @@ const FRAME_ELEMENT_MESSAGE = sprintf(
   prettifyShortcut('alt')
 );
 
-function FrameElement({ id }) {
+function FrameElement({ id, handleEnterFocusGroup }) {
   const speak = useLiveRegion();
   const enterFocusGroup = useEditLayerFocusManager(
     ({ enterFocusGroup }) => enterFocusGroup
@@ -186,16 +186,25 @@ function FrameElement({ id }) {
     setIsTransforming(transform !== null);
   });
 
+  const onSelectElement = useCallback(
+    (evt) => {
+      handleSelectElement(id, evt);
+      handleEnterFocusGroup(id);
+    },
+    [handleSelectElement, handleEnterFocusGroup, id]
+  );
   // Media needs separate handler for double click.
   const { isMedia } = getDefinitionForType(type);
   const handleMediaDoubleClick = useCallback(
     (evt) => {
       if (!isSelected) {
-        handleSelectElement(id, evt);
+        console.log('on media double click');
+
+        onSelectElement(evt);
       }
       setEditingElement(id);
     },
-    [id, setEditingElement, handleSelectElement, isSelected]
+    [id, setEditingElement, onSelectElement, isSelected]
   );
   const handleMediaClick = useDoubleClick(NOOP, handleMediaDoubleClick);
 
@@ -208,7 +217,10 @@ function FrameElement({ id }) {
   const handleFocus = useCallback(
     (evt) => {
       if (!isSelected) {
-        handleSelectElement(id, evt);
+        console.log('on focus');
+
+        // establish focused group too
+        onSelectElement(evt);
       }
 
       // no floating menu on background, so no need to announce
@@ -218,7 +230,7 @@ function FrameElement({ id }) {
       }
       speak(FRAME_ELEMENT_MESSAGE);
     },
-    [handleSelectElement, id, isBackground, isSelected, speak]
+    [onSelectElement, isBackground, isSelected, speak]
   );
 
   const handleMouseDown = useCallback(

@@ -34,9 +34,23 @@ function EditLayerFocusManager({ children }) {
   stateRef.current = state;
 
   const enterFocusGroup = useCallback(
-    ({ groupId, cleanup }) => {
+    ({ groupId, cleanup, activeId }) => {
       // grab the first node in the focus group & focus it
-      const nodeTuple = stateRef.current.focusGroups?.[groupId]?.[0];
+      let nodeTuple = stateRef.current.focusGroups?.[groupId]?.[0];
+
+      // If there's an activeId passed in, check to see if it's part of an element in the focus group.
+      // if it is, then make that the node to focus instead.
+      if (activeId) {
+        const activeNode = stateRef.current.focusGroups?.[groupId].find(
+          ([uuid, element]) => {
+            const elementId = element.getAttribute('data-element-id');
+            return elementId === activeId ? uuid : false;
+          }
+        );
+        // replace standard nodeTuple with updated activeNode.
+        nodeTuple = activeNode;
+      }
+
       if (nodeTuple) {
         const [, node] = nodeTuple;
         node.focus();
