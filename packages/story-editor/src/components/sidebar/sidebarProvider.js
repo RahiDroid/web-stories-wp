@@ -39,19 +39,6 @@ import Style from '../style';
 import { DOCUMENT, STYLE, PUBLISH_MODAL_DOCUMENT, INSERT } from './constants';
 import Context from './context';
 
-const TABS = [
-  {
-    id: INSERT,
-    title: __('Insert', 'web-stories'),
-    Pane: Library,
-  },
-  {
-    id: STYLE,
-    title: __('Style', 'web-stories'),
-    Pane: Style,
-  },
-];
-
 const SIDEBAR_TAB_IDS = new Set([INSERT, DOCUMENT, STYLE]);
 function SidebarProvider({ sidebarTabs, children }) {
   const {
@@ -147,29 +134,6 @@ function SidebarProvider({ sidebarTabs, children }) {
     }
   }, [isUsersLoading, users.length, getAuthors]);
 
-  const tabs = useMemo(
-    () =>
-      [
-        ...TABS,
-        sidebarTabs?.document && {
-          id: DOCUMENT,
-          ...sidebarTabs.document,
-        },
-      ].filter(Boolean),
-    [sidebarTabs]
-  );
-
-  const data = useMemo(
-    () => ({
-      tabs,
-      modalSidebarTab: sidebarTabs?.publishModal && {
-        id: PUBLISH_MODAL_DOCUMENT,
-        ...sidebarTabs.publishModal,
-      },
-    }),
-    [tabs, sidebarTabs]
-  );
-
   const state = {
     state: {
       tab,
@@ -186,8 +150,35 @@ function SidebarProvider({ sidebarTabs, children }) {
       loadUsers,
       setSidebarContentNode,
     },
-    data,
+    data: {
+      tabs: [
+        {
+          id: INSERT,
+          title: __('Insert', 'web-stories'),
+          Pane: Library,
+        },
+        {
+          id: STYLE,
+          title: __('Style', 'web-stories'),
+          Pane: Style,
+        },
+      ],
+    },
   };
+
+  if (sidebarTabs?.document) {
+    state.data.tabs.push({
+      id: DOCUMENT,
+      ...sidebarTabs.document,
+    });
+  }
+
+  if (sidebarTabs?.publishModal) {
+    state.data.modalSidebarTab = {
+      id: PUBLISH_MODAL_DOCUMENT,
+      ...sidebarTabs.publishModal,
+    };
+  }
 
   return <Context.Provider value={state}>{children}</Context.Provider>;
 }

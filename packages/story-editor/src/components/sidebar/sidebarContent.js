@@ -34,10 +34,10 @@ const SidebarPanes = styled.section`
 `;
 
 function Sidebar() {
-  const { tab, tabs } = useSidebar(({ state: { tab }, data: { tabs } }) => ({
-    tab,
-    tabs,
-  }));
+  const {
+    state: { tab },
+    data: { tabs },
+  } = useSidebar();
 
   return (
     <SidebarPanes>

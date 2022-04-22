@@ -52,22 +52,12 @@ const UnjustifiedTabView = styled(TabView)`
 `;
 
 function SidebarLayout() {
-  const { tab, tabRefs, setSidebarContentNode, setTab, sidebar, tabs } =
-    useSidebar(
-      ({
-        state: { tab, tabRefs },
-        actions: { setSidebarContentNode, setTab },
-        refs: { sidebar },
-        data: { tabs },
-      }) => ({
-        tab,
-        tabRefs,
-        setSidebarContentNode,
-        setTab,
-        sidebar,
-        tabs,
-      })
-    );
+  const {
+    state: { tab, tabRefs },
+    actions: { setSidebarContentNode, setTab },
+    refs: { sidebar },
+    data: { tabs },
+  } = useSidebar();
 
   const onTabChange = useCallback(
     (id) => {
