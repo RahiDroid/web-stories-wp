@@ -310,6 +310,7 @@ function Layer({ element }) {
               <Icons.LockClosed />
             </IconWrapper>
           )}
+          {element.groupId}
         </LayerDescription>
       </LayerButton>
       <ActionsContainer>

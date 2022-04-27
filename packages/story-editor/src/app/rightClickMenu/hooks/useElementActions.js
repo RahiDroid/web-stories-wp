@@ -20,6 +20,8 @@ import { useSnackbar } from '@googleforcreators/design-system';
 import { __ } from '@googleforcreators/i18n';
 import { useCallback, useRef } from '@googleforcreators/react';
 import { trackEvent } from '@googleforcreators/tracking';
+import { v4 as uuidv4 } from 'uuid';
+
 /**
  * Internal dependencies
  */
@@ -90,6 +92,25 @@ const useElementActions = () => {
       elements: selectedElements.map((element) => element.type),
     });
   }, [duplicateElementsById, selectedElements, showSnackbar]);
+
+  const handleGroupSelectedElements = useCallback(() => {
+    if (!selectedElements.length) {
+      return;
+    }
+
+    const groupId = uuidv4();
+    updateElementsById({
+      elementIds: selectedElements.map(({ id }) => id),
+      properties: (currentProperties) =>
+        updateProperties(
+          currentProperties,
+          {
+            groupId,
+          },
+          /* commitValues */ true
+        ),
+    });
+  }, [selectedElements, updateElementsById]);
 
   /**
    * Set element as the element being 'edited'.
@@ -204,6 +225,7 @@ const useElementActions = () => {
 
   return {
     handleDuplicateSelectedElements,
+    handleGroupSelectedElements,
     handleOpenScaleAndCrop,
     handleSetPageBackground,
     handleRemovePageBackground,

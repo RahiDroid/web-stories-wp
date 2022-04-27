@@ -169,8 +169,11 @@ const arrangeSelection =
 
 const setSelectedElementsById =
   (dispatch) =>
-  ({ elementIds }) =>
-    dispatch({ type: types.SET_SELECTED_ELEMENTS, payload: { elementIds } });
+  ({ elementIds, withLinked }) =>
+    dispatch({
+      type: types.SET_SELECTED_ELEMENTS,
+      payload: { elementIds, withLinked },
+    });
 
 const clearSelection = (dispatch) => () =>
   dispatch({ type: types.SET_SELECTED_ELEMENTS, payload: { elementIds: [] } });

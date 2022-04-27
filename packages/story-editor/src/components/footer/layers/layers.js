@@ -37,7 +37,7 @@ const Container = styled.div`
 `;
 
 const StyledNavigationWrapper = styled(NavigationWrapper)`
-  width: 260px;
+  width: 600px;
 `;
 function Layers() {
   const layersLength = useLayers().length;

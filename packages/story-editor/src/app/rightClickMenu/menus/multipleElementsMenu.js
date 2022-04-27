@@ -25,12 +25,20 @@ import { RIGHT_CLICK_MENU_LABELS } from '../constants';
 import { useElementActions } from '../hooks';
 
 function MultipleElementsMenu() {
-  const { handleDuplicateSelectedElements } = useElementActions();
+  const { handleDuplicateSelectedElements, handleGroupSelectedElements } =
+    useElementActions();
 
   return (
-    <ContextMenuComponents.MenuButton onClick={handleDuplicateSelectedElements}>
-      {RIGHT_CLICK_MENU_LABELS.DUPLICATE_ELEMENTS(2)}
-    </ContextMenuComponents.MenuButton>
+    <>
+      <ContextMenuComponents.MenuButton
+        onClick={handleDuplicateSelectedElements}
+      >
+        {RIGHT_CLICK_MENU_LABELS.DUPLICATE_ELEMENTS(2)}
+      </ContextMenuComponents.MenuButton>
+      <ContextMenuComponents.MenuButton onClick={handleGroupSelectedElements}>
+        {RIGHT_CLICK_MENU_LABELS.GROUP_LAYERS}
+      </ContextMenuComponents.MenuButton>
+    </>
   );
 }
 
