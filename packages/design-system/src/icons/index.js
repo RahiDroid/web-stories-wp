@@ -132,3 +132,6 @@ export { default as TrashFilledSmall } from './trash_filled_small.svg';
 export { default as TurningLine } from './turning_line.svg';
 export { default as Union } from './union.svg';
 export { default as Video } from './video.svg';
+export { default as ProductCheck } from './product_check.svg';
+export { default as ProductPlus } from './product_plus.svg';
+export { default as ProductRemove } from './product_remove.svg';

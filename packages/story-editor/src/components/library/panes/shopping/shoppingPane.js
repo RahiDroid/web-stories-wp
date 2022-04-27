@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,118 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * External dependencies
  */
 import { useFeature } from 'flagged';
-import styled from 'styled-components';
-import { useCallback, useEffect, useState } from '@googleforcreators/react';
+import styled, { css } from 'styled-components';
+import {
+  useCallback,
+  useState,
+  useEffect,
+  forwardRef,
+} from '@googleforcreators/react';
 import { __ } from '@googleforcreators/i18n';
 import {
-  Button,
-  BUTTON_VARIANTS,
-  BUTTON_TYPES,
-  BUTTON_SIZES,
-  Datalist,
   Text,
   THEME_CONSTANTS,
+  Search,
+  Icons,
+  Button,
+  BUTTON_TYPES,
+  BUTTON_SIZES,
+  BUTTON_VARIANTS,
+  noop,
 } from '@googleforcreators/design-system';
 
 /**
  * Internal dependencies
  */
-import { useStory, useAPI } from '../../../../app';
+import { Section } from '../../common';
+import { useAPI } from '../../../../app';
 import { Row } from '../../../form';
 import useLibrary from '../../useLibrary';
 import { Pane } from '../shared';
+import { useStory } from '../../../../app/story';
 import paneId from './paneId';
+
+const containerStyleOverrides = css`
+  background-color: transparent;
+  border: none;
+`;
+
+const StyledListItem = styled.li`
+  border: none;
+  background: 'transparent';
+  position: relative;
+  overflow: hidden;
+`;
+
+const StyledProductContainer = styled.div`
+  display: flex;
+  padding: 5px 0;
+  align-items: center;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.divider.tertiary};
+`;
+
+const StyledProductButton = styled.div`
+  margin-right: 10px;
+  button {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+  }
+
+  .check {
+    color: ${({ theme }) => theme.colors.fg.positive};
+  }
+
+  .remove {
+    color: ${({ theme }) => theme.colors.fg.negative};
+    display: none;
+  }
+
+  &:hover {
+    .remove {
+      display: block;
+    }
+
+    .check {
+      display: none;
+    }
+  }
+`;
+
+const basePlaceholder = css`
+  display: block;
+  margin-right: 10px;
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.colors.interactiveBg.disable};
+  width: 41px;
+  height: 41px;
+`;
+
+const StyledProductPlaceHolder = styled.div`
+  ${basePlaceholder}
+`;
+
+const StyledProductImage = styled.img`
+  ${basePlaceholder}
+`;
+
+const StyledProductDescription = styled.div`
+  padding-left: 12px;
+`;
+
+const StyledProductName = styled(Text).attrs({
+  size: THEME_CONSTANTS.TYPOGRAPHY.PRESET_SIZES.MEDIUM,
+})`
+  color: ${({ theme }) => theme.colors.fg.primary};
+`;
+
+const StyledPrice = styled(Text)`
+  color: ${({ theme }) => theme.colors.fg.tertiary};
+`;
 
 const HelperText = styled(Text).attrs({
   size: THEME_CONSTANTS.TYPOGRAPHY.PRESET_SIZES.SMALL,
@@ -46,50 +132,54 @@ const HelperText = styled(Text).attrs({
   color: ${({ theme }) => theme.colors.fg.secondary};
 `;
 
+// @todo fully replace this to handle multiple currencies etc...
+function tempFormatCurrency(num) {
+  const total = Number(num).toFixed(
+    Math.max(num.toString().split('.')[1]?.length, 2) || 2
+  );
+  return `$${total}`;
+}
+
 function ShoppingPane(props) {
   const isEnabled = useFeature('shoppingIntegration');
+  const [pageProducts, setPageProducts] = useState([]);
+  const [options, setOptions] = useState([]);
   const {
     actions: { getProducts },
   } = useAPI();
-  const isSaving = useStory(
-    ({
-      state: {
-        meta: { isSaving },
-      },
-    }) => isSaving
+
+  const { storyPages, deleteElementById } = useStory(
+    ({ state: { pages }, actions }) => ({
+      storyPages: pages,
+      deleteElementById: actions.deleteElementById,
+    })
   );
 
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [initialOptions, setInitialOptions] = useState([]);
-
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const products = await getProducts();
-      setInitialOptions(
-        products.map((p) => ({
-          name: p.productTitle,
-          id: p.productId,
-          product: p,
-        }))
-      );
-      setIsLoading(false);
-    })();
-  }, [getProducts]);
-
-  const onChange = ({ product: newProduct }) => {
-    setProduct(newProduct);
-  };
+    const products = [];
+    storyPages.forEach((page) => {
+      page.elements.forEach((element) => {
+        if (element?.type === 'product') {
+          products.push({
+            elementId: element.id,
+            productId: element.product.productId,
+          });
+        }
+      });
+    });
+    setPageProducts(products);
+  }, [storyPages]);
 
   const getProductsByQuery = useCallback(
     async (value) => {
       const products = await getProducts(value);
-      return products.map((p) => ({
-        name: p.productTitle,
-        id: p.productId,
-        product: p,
-      }));
+      setOptions(
+        products.map((p) => ({
+          label: p.productTitle,
+          value: p.productTitle,
+          product: p,
+        }))
+      );
     },
     [getProducts]
   );
@@ -98,59 +188,122 @@ function ShoppingPane(props) {
     insertElement: state.actions.insertElement,
   }));
 
-  const insertProduct = useCallback(() => {
-    insertElement('product', {
-      width: 25,
-      height: 25,
-      product,
-    });
-    setProduct(null);
-  }, [insertElement, product]);
+  const deleteProduct = useCallback(
+    (product) => {
+      const element = pageProducts.find(
+        (item) => item.productId === product.productId
+      );
+      if (element) {
+        deleteElementById({ elementId: element.elementId });
+      }
+    },
+    [deleteElementById, pageProducts]
+  );
+
+  const insertProduct = useCallback(
+    (product) => {
+      insertElement('product', {
+        width: 25,
+        height: 25,
+        product,
+      });
+    },
+    [insertElement]
+  );
 
   if (!isEnabled) {
     return null;
   }
 
-  const dropDownParams = {
-    hasSearch: true,
-    lightMode: true,
-    onChange,
-    getOptionsByQuery: getProductsByQuery,
-    selectedId: product?.productId,
-    dropDownLabel: __('Product', 'web-stories'),
-    placeholder: isLoading ? __('Loading…', 'web-stories') : '',
-    disabled: isLoading ? true : isSaving,
-    primaryOptions: isLoading ? [] : initialOptions,
-    zIndex: 10,
-  };
+  const RenderItemOverride = forwardRef(
+    ({ option, isSelected, ...rest }, ref) => {
+      const onPage = pageProducts.find(
+        (item) => item.productId === option?.product.productId
+      );
+      const activeIcon = (
+        <>
+          <Icons.ProductCheck className="check" />{' '}
+          <Icons.ProductRemove className="remove" />
+        </>
+      );
+
+      const handleClick = onPage
+        ? () => {
+            deleteProduct(option?.product);
+          }
+        : () => {
+            insertProduct(option?.product);
+          };
+      const src = option?.product?.productImages[0]?.url || '';
+      return (
+        // eslint-disable-next-line styled-components-a11y/click-events-have-key-events -- click events in the contained buttons.
+        <StyledListItem
+          ref={ref}
+          width={option.width}
+          active={isSelected}
+          {...rest}
+          onClick={null}
+        >
+          <StyledProductContainer>
+            <StyledProductButton>
+              <Button
+                aria-label={__('Add', 'web-stories')}
+                onClick={handleClick}
+                type={BUTTON_TYPES.TERTIARY}
+                size={BUTTON_SIZES.SMALL}
+                variant={BUTTON_VARIANTS.SQUARE}
+              >
+                {onPage ? activeIcon : <Icons.ProductPlus />}
+              </Button>
+            </StyledProductButton>
+            {src ? (
+              <StyledProductImage
+                alt={option?.product?.productTitle}
+                src={src}
+              />
+            ) : (
+              <StyledProductPlaceHolder />
+            )}
+            <StyledProductDescription>
+              <StyledProductName isBold>{option.label}</StyledProductName>
+              <StyledPrice>
+                {tempFormatCurrency(option.product.productPrice)}
+              </StyledPrice>
+            </StyledProductDescription>
+          </StyledProductContainer>
+        </StyledListItem>
+      );
+    }
+  );
 
   return (
     <Pane id={paneId} {...props}>
-      <Row>
-        <HelperText>
-          {__(
-            'Select a product to add to the page. It will be displayed as a "dot" on the page, as well as in the page attachment.',
-            'web-stories'
-          )}
-        </HelperText>
-      </Row>
-      <Row>
-        <Datalist.DropDown
-          options={initialOptions}
-          searchResultsLabel={__('Search results', 'web-stories')}
-          aria-label={__('Product', 'web-stories')}
-          {...dropDownParams}
-        />
-      </Row>
-      <Button
-        variant={BUTTON_VARIANTS.RECTANGLE}
-        type={BUTTON_TYPES.SECONDARY}
-        size={BUTTON_SIZES.SMALL}
-        onClick={insertProduct}
-        disabled={!product}
+      <Section
+        data-testid="shapes-library-pane"
+        title={__('Products', 'web-stories')}
       >
-        {__('Insert product', 'web-stories')}
-      </Button>
+        <Row>
+          <HelperText>
+            {__(
+              'This will add products as a tappable dot on your story.',
+              'web-stories'
+            )}
+          </HelperText>
+        </Row>
+        <Row>
+          <Search
+            menuStylesOverride={containerStyleOverrides}
+            placeholder={'search'}
+            selectedValue={null}
+            onMenuItemClick={null}
+            onClear={noop}
+            options={options}
+            handleSearchValueChange={getProductsByQuery}
+            emptyText={__('No options available', 'web-stories')}
+            renderItem={RenderItemOverride}
+          />
+        </Row>
+      </Section>
     </Pane>
   );
 }
