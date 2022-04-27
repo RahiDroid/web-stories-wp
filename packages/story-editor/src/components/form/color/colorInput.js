@@ -291,7 +291,12 @@ const ColorInput = forwardRef(function ColorInput(
             />
           )}
           <ColorPreview>
-            <Tooltip title={tooltip} hasTail placement={tooltipPlacement}>
+            <Tooltip
+              isDelayed={isInDesignMenu}
+              title={tooltip}
+              hasTail
+              placement={tooltipPlacement}
+            >
               <StyledSwatch
                 isSmall
                 pattern={previewPattern}
@@ -303,7 +308,12 @@ const ColorInput = forwardRef(function ColorInput(
         </Preview>
       ) : (
         // If not editable, the whole component is a button
-        <Tooltip title={tooltip} hasTail placement={tooltipPlacement}>
+        <Tooltip
+          isDelayed={isInDesignMenu}
+          title={tooltip}
+          hasTail
+          placement={tooltipPlacement}
+        >
           <ColorButton ref={previewRef} id={uuidv4()} {...buttonProps}>
             <ColorPreview>
               <Swatch

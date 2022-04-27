@@ -33,7 +33,11 @@ import ToggleButton from './toggleButton';
 const IconButton = memo(
   forwardRef(function IconButton({ Icon, ...rest }, ref) {
     return (
-      <Tooltip placement={TOOLTIP_PLACEMENT.BOTTOM} title={rest.title}>
+      <Tooltip
+        isDelayed
+        placement={TOOLTIP_PLACEMENT.BOTTOM}
+        title={rest.title}
+      >
         <ToggleButton ref={ref} tabIndex={-1} {...rest}>
           <ContextMenuComponents.MenuIcon title={rest.title}>
             <Icon />

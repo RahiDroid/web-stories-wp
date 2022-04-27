@@ -144,6 +144,7 @@ const Color = forwardRef(function Color(
     >
       {hasEyedropper && (
         <Tooltip
+          isDelayed={isInDesignMenu}
           title={tooltip}
           hasTail
           placement={

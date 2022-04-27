@@ -143,7 +143,7 @@ function TextAlign() {
 
   return (
     <>
-      <Tooltip placement={TOOLTIP_PLACEMENT.BOTTOM} title={tooltip}>
+      <Tooltip isDelayed placement={TOOLTIP_PLACEMENT.BOTTOM} title={tooltip}>
         <StyledMenuButton
           tabIndex={-1}
           ref={buttonRef}
