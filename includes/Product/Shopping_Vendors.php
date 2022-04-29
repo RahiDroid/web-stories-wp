@@ -26,12 +26,10 @@
  * limitations under the License.
  */
 
-namespace Google\Web_Stories;
+namespace Google\Web_Stories\Product;
 
 use Google\Web_Stories\Infrastructure\Injector;
 use Google\Web_Stories\Interfaces\Product_Query;
-use Google\Web_Stories\Product\Shopify_Query;
-use Google\Web_Stories\Product\Woocommerce_Query;
 
 /**
  * Class Shopping_Vendors.
